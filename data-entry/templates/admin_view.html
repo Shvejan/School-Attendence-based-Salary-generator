@@ -1,0 +1,141 @@
+{% extends 'layout.html' %} {% block title %}Admin{% endblock %} {% block body
+%}
+<style>
+  #data {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 70%;
+  }
+
+  #data td,
+  #data th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  #data tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  #data tr:hover {
+    background-color: rgb(132, 145, 136);
+  }
+
+  #data th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4caf50;
+    color: white;
+  }
+</style>
+
+<h1 align="center">Welcome admin</h1>
+<br /><br /><br />
+<form action="{{ url_for('edits') }}" method="post">
+  <input type="text" name="name" placeholder="Employee name" />
+  <input type="text" name="department" placeholder="Department" />
+  <input type="text" name="pan" placeholder="PAN" />
+  <input type="text" name="designation" placeholder="Designation" />
+  <input type="text" name="bank" placeholder="Bank" value="South India Bank" />
+  <input type="text" name="accNo" placeholder="Account Number" />
+  <input type="text" name="pf" placeholder="PF" />
+  <input type="text" name="esi" placeholder="ESI" />
+  <input
+    type="text"
+    name="leaves_allowed"
+    placeholder="Leaves Allowed"
+    value="3"
+  />
+  <br />
+  <button type="submit" name="button" value="1">Add</button>
+</form>
+<h2 align="center">Employee Data</h2>
+<table id="data">
+  <tr>
+    <th>Employee id</th>
+    <th>Employee name</th>
+    <th>Leaves Taken</th>
+    <th>Absent</th>
+  </tr>
+  {% for a in data %}
+  <tr>
+    <td>{{ a[0] }}</td>
+    <td>{{ a[1] }}</td>
+    <td>
+      <input
+        type="number"
+        id="{{a[0]}}"
+        name="leaves_taken"
+        class="emp_data"
+        value=""
+      />
+    </td>
+    <td>
+      <input
+        type="number"
+        id="{{a[0]}}"
+        name="Absent"
+        class="emp_data"
+        value=""
+      />
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<br /><br />
+<input type="text" id="month" placeholder="Month" />
+<input type="number" id="working_days" placeholder="Working Days" />
+<input type="number" id="days_in_month" placeholder="Days in Month" />
+<button type="submit" name="button" onclick="generate()">
+  Generate Payslips
+</button>
+<script type="text/javascript">
+  const generate = () => {
+    json = {};
+    const arr = document.getElementsByClassName("emp_data");
+    json = extractData(arr);
+    if (
+      document.getElementById("month").value === "" ||
+      document.getElementById("working_days").value === "" ||
+      document.getElementById("days_in_month").value === ""
+    ) {
+      alert("enter Month details");
+      return;
+    }
+    const month = document.getElementById("month").value;
+    const working_days = document.getElementById("working_days").value;
+    const days_in_month = document.getElementById("days_in_month").value;
+    const result = {
+      json,
+      month,
+      working_days,
+      days_in_month,
+    };
+    console.log(result);
+    fetch(`${window.origin}/generate`, {
+      method: "POST",
+      body: JSON.stringify(result),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    });
+  };
+  const extractData = (arr) => {
+    json = {};
+    for (let x = 0; x < arr.length; x++) {
+      if (arr[x].value === "") {
+        alert("fill all the fields");
+        return;
+      }
+      if (json[arr[x].id] === undefined) {
+        json[arr[x].id] = {};
+        console.log("sett");
+      }
+      json[arr[x].id][arr[x].name] = arr[x].value;
+    }
+    return json;
+  };
+</script>
+{% endblock %}

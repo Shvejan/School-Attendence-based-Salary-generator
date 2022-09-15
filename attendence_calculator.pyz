@@ -1,0 +1,117 @@
+import os
+import csv
+import xlrd 
+import shutil
+import docx
+month=29
+late=0
+
+
+m_name = input("month: ")
+holidays = int(input("number of holidays: "))
+
+f = xlrd.open_workbook("data.xls") 
+sheet = f.sheet_by_index(0)
+sal = {1:5000,12:5000,13:5000,14:5000,15:5000,16:5000,17:5000,20:5000,21:5000,22:5000,23:5000,26:5000,30:5000,110:5000,112:5000,115:5000}
+total = 0
+
+for i in range(sheet.nrows):
+    x=sheet.row_values(i)
+    if "Emp Code:" in x:
+        id = int(sheet.cell_value(i,2))
+        #print("id: ",id)
+        r=sheet.cell_value(i+month+2,1)
+        s = r.split(",")
+        a = s[4].split('=')
+        a=int(a[1])
+        #print("absent: ",a)
+        i+=2
+        c=0
+        for c in range(month):
+            if "00:00" not in sheet.cell_value(i,13):
+                late+=1
+            i+=1
+        #print("late by: ",late)
+        total_abs = a+divmod(late,3)[0] - holidays
+        #print("total abs: ", total_abs)
+        total_sal = ( sal[id] * (month -total_abs )/ month ) 
+        #print("total sal: ",total_sal)
+        sal[id] = round(total_sal)
+        #print()
+        late=0
+
+
+
+
+
+
+doc = docx.Document("letter.docx")
+for p in doc.paragraphs:
+    if "%month%" in p.text:
+        p.text = p.text.replace("%month%",m_name)
+
+
+ts = doc.tables
+
+for t in ts:
+    #print("t")
+    for r in t.rows:
+            #sprint("r")
+            for c in r.cells:
+                v = c.paragraphs[0].text
+                if v == "%1%":
+                    c.paragraphs[0].text=str(sal[1])
+                    total+=sal[1]
+                if v == "%12%":
+                    c.paragraphs[0].text=str(sal[12])
+                    total+=sal[12]
+                if v == "%13%":
+                    c.paragraphs[0].text=str(sal[13])
+                    total+=sal[13]
+                if v == "%14%":
+                    c.paragraphs[0].text=str(sal[14])
+                    total+=sal[14]
+                if v == "%15%":
+                    c.paragraphs[0].text=str(sal[15])
+                    total+=sal[15]
+                if v == "%16%":
+                    c.paragraphs[0].text=str(sal[16])
+                    total+=sal[16]
+                if v == "%17%":
+                    c.paragraphs[0].text=str(sal[17])
+                    total+=sal[17]
+                if v == "%20%":
+                    c.paragraphs[0].text=str(sal[20])
+                    total+=sal[20]
+                if v == "%21%":
+                    c.paragraphs[0].text=str(sal[21])
+                    total+=sal[21]
+                if v == "%22%":
+                    c.paragraphs[0].text=str(sal[22])
+                    total+=sal[22]
+                if v == "%23%":
+                    c.paragraphs[0].text=str(sal[23])
+                    total+=sal[23]
+                if v == "%26%":
+                    c.paragraphs[0].text=str(sal[26])
+                    total+=sal[26]
+                if v == "%30%":
+                    c.paragraphs[0].text=str(sal[30])
+                    total+=sal[30]
+                if v == "%110%":
+                    c.paragraphs[0].text=str(sal[110])
+                    total+=sal[110]
+                if v == "%112%":
+                    c.paragraphs[0].text=str(sal[112])
+                    total+=sal[112]
+                if v == "%115%":
+                    c.paragraphs[0].text=str(sal[115])
+                    total+=sal[115]
+                if v == "%total%":
+                    c.paragraphs[0].text=str(total)
+                    
+                   
+
+print("done")
+op = m_name + ".doc"
+doc.save(op)
